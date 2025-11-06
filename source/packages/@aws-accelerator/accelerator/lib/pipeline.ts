@@ -458,10 +458,14 @@ export class AcceleratorPipeline extends Construct {
             commands: [
               'env',
               `if [ "prepare" = "\${ACCELERATOR_STAGE}" ]; then 
+                set -e
                 cd source;
+                echo "Installing dependencies..."
                 if [ -f .yarnrc ]; then yarn install --use-yarnrc .yarnrc; else yarn install; fi
+                echo "Building project..."
                 yarn build
-                set -e && LOG_LEVEL=info yarn validate-config $CODEBUILD_SRC_DIR_Config;
+                echo "Validating configuration..."
+                LOG_LEVEL=info yarn validate-config $CODEBUILD_SRC_DIR_Config;
                 export PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[:space:]');
                 if [ "$ACCELERATOR_CHECK_VERSION" = "yes" ]; then
                   if [ "$PACKAGE_VERSION" != "$ACCELERATOR_PIPELINE_VERSION" ]; then
